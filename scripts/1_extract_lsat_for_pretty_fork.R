@@ -14,7 +14,7 @@ require(dplyr)
 require(raster)
 
 # require(devtools)
-# install_github('https://github.com/logan-berner/lsatTS/', auth_token = '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')
+# install_github('https://github.com/logan-berner/lsatTS/', auth_token = '')
 
 # setwd('C:/Users/Logan/My Drive/research/side_projects/dial_brooks_range/')
 ak.aea.proj <- '+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs'
