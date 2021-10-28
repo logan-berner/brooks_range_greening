@@ -52,7 +52,7 @@ st_write(transect.pts, dsn = outname, append = F)
 
 # Extract Landsat time-series for points along transect
 ee_Initialize()
-lsat_export_ts(transect.pts, file_prefix = 'lsat_pretty_fork_test_', drive_export_dir = 'earth_engine', 
+lsat_export_ts(transect.pts, file_prefix = 'lsat_pretty_fork_test', drive_export_dir = 'earth_engine', 
                startJulian = 142, endJulian = 243)
 
 ## NOTE-- ONCE DATA EXTRACTION IS COMPELET, MOVE THE CSV FILES OUT OF YOUR GOOGLE DRIVE AND INTO THE /data/lsat_extracs/ folder 

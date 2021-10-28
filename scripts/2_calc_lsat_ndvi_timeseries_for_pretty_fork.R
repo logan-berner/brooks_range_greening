@@ -1,10 +1,9 @@
 # This R script develops Landsat NDVI time series for sampling sites along a transect across the Brooks Range.
 # Author: Logan Berner, NAU
-# Date: 2021-04-08
+# Date: 2021-10-28
 
 # SET UP WORK SPACE ---------------------------------------------------------------------------
 rm(list=ls())
-# devtools::install_github('logan-berner/lsatTS', auth_token = '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')
 require(lsatTS)
 require(data.table)
 require(rgdal)
@@ -12,20 +11,23 @@ require(sf)
 require(ggplot2)
 require(ggmap)
 require(ggridges)
-setwd('C:/Users/Logan/My Drive/research/side_projects/dial_brooks_range/')
+require(R.utils)
+# setwd('C:/Users/Logan/My Drive/research/side_projects/dial_brooks_range/')
 
 # PROCESS LANDSAT DATA -----------------------------------------------------------------------
 # Load files
-temp.files <- list.files('output/lsat_extracts/', pattern = 'pretty_fork', full.names = T)
+temp.files <- list.files('data/lsat_extracts/', pattern = 'pretty_fork', full.names = T)
 lsat.dt <- do.call("rbind", lapply(temp.files, fread))
 
-pts.sf <- st_read('gis_data/PrettyFork_Sample45mGrid.shp')
+pts.sf <- st_read('output/pixel_walking_subset_tracks/pretty_fork_sample_100m_grid.shp')
+
 
 # Parse data, filter to clear-sky observations, compute mean surface reflectance among pxls w/in each window around a site
 lsat.dt <- lsat_general_prep(dt = lsat.dt)
 
 # Clean the data, filtering out clouds, snow, water, radiometric and geometric errors
-lsat.dt <- lsat_clean_data(lsat.dt, geom.max = 15, cloud.max = 80, sza.max = 60, filter.snow = T, filter.water = T)
+lsat.dt <- lsat_clean_data(lsat.dt, geom.max = 15, cloud.max = 80, sza.max = 60, 
+                           filter.cfmask.snow = T, filter.cfmask.water = T, filter.jrc.water = T)
 
 # Check availability of Landsat data
 data.summary.dt <- lsat_summarize_data_avail(lsat.dt)
@@ -35,7 +37,7 @@ data.summary.dt
 lsat.dt <- lsat_calc_spec_index(lsat.dt, 'ndvi')
 
 # Cross-calibrate NDVI among sensors using RF models
-lsat.dt <- lsat_calibrate_rf(lsat.dt, band = 'ndvi', doy.rng = 151:242, min.obs = 5, frac.train = 0.80, overwrite.col = T, outdir = 'grants/1_underway/NSF_ANS_2021_DArrigo_BrooksTreeline/output/ndvi_xcal/')
+lsat.dt <- lsat_calibrate_rf(lsat.dt, band = 'ndvi', doy.rng = 151:242, min.obs = 5, frac.train = 0.80, overwrite.col = T, outdir = 'output/ndvi_xcal/')
 
 # Fit phenological models (cubic splines) to each time series
 lsat.pheno.dt <- lsat_fit_phenological_curves(lsat.dt, vi = 'ndvi', window.yrs = 5, window.min.obs = 10, vi.min = 0.1, spl.fit.outfile = F, progress = T)
@@ -51,7 +53,6 @@ lsat.gs.dt$vegstack <- pts.sf$Vegstack[match(lsat.gs.dt$site, pts.sf$site)]
 
 # Write out data.table with growing season summaries
 fwrite(lsat.gs.dt, 'output/pretty_fork_lsat_ndvi_max_timeseries.csv')
-# lsat.gs.dt <- fread('grants/1_underway/NSF_ANS_2021_DArrigo_BrooksTreeline/output/lsat_ndvi_max_brooks_range_transect.csv')
 
 # Compute temporal trend in annual maximum NDVI
 lsat.trnd.dt <- lsat_calc_trend(lsat.gs.dt, 'ndvi.max', yrs = 2000:2020, sig = 0.10)
@@ -62,7 +63,8 @@ fwrite(lsat.trnd.dt, 'output/pretty_fork_lsat_ndvi_max_trends.csv')
 
 # write out shapefile
 lsat.trnd.sf = st_as_sf(lsat.trnd.dt, coords = c("longitude", "latitude"), crs = 4326, agr = "constant")
-st_write(lsat.trnd.sf, dsn = 'gis_data/pretty_fork__lsat_ndvi_trends_wgs84', driver = 'ESRI Shapefile', append = F)
+mkdirs('output/pixel_walking_lsat_trend_tracks/')
+st_write(lsat.trnd.sf, dsn = 'output/pixel_walking_lsat_trend_tracks/lsat_/pretty_fork_lsat_ndvi_trends_wgs84', driver = 'ESRI Shapefile', append = F)
 
 
 # FIGURES ================================================================================

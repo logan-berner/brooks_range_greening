@@ -6,7 +6,7 @@
 rm(list=ls())
 require(data.table)
 require(ggplot2)
-setwd('C:/Users/Logan/My Drive/research/side_projects/dial_brooks_range/')
+# setwd('C:/Users/Logan/My Drive/research/side_projects/dial_brooks_range/')
 
 lsat.dt <- fread('output/pretty_fork_lsat_ndvi_max_timeseries.csv')
 
