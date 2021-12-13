@@ -2,7 +2,7 @@
 # extracts Landsat data for these points using GEE. 
 # A helpful resource for working with spatial data in R: https://www.maths.lancs.ac.uk/~rowlings/Teaching/UseR2012/cheatsheet.html
 # Author: Logan Berner, NAU
-# Date: 2021-09-27 
+# Date: 2021-09-27  
 
 # SET UP -------------------------------------------------------------------------------------------
 rm(list=ls())
